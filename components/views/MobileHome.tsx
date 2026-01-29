@@ -2,7 +2,7 @@
 
 import { CalendarIcon, Clock, Users, Heart, MapPin, CheckCircle, ArrowRight, CreditCard, GridIcon, Minus, Plus, Accessibility, Ruler, Baby, Shirt, Car, AlertCircle, ChevronDown } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { BUSINESS_CONFIG } from '@/app/config'
+import { BUSINESS_CONFIG } from '@/lib/config'
 
 export interface Slot {
     id: string
@@ -21,9 +21,11 @@ export interface HomeViewProps {
     peopleCount: number
     bookingType: 'OPEN' | 'PRIVATE'
     showMinWarning: boolean
+    selectedSlotId: string | null
 
     // Handlers
-    onOpenModal: () => void
+    onOpenCalendarModal: () => void
+    onOpenBookingModal: () => void
     onPeopleIncrement: () => void
     onPeopleDecrement: () => void
     onBookingTypeChange: (value: 'OPEN' | 'PRIVATE') => void
@@ -35,7 +37,9 @@ export default function MobileHome({
     peopleCount,
     bookingType,
     showMinWarning,
-    onOpenModal,
+    selectedSlotId,
+    onOpenCalendarModal,
+    onOpenBookingModal,
     onPeopleIncrement,
     onPeopleDecrement,
     onBookingTypeChange,
@@ -109,25 +113,31 @@ export default function MobileHome({
                         </span>
                     </div>
 
-                    {/* Date and Time - Label OUTSIDE the box */}
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">Data e Horário</p>
-                    <button
-                        onClick={onOpenModal}
-                        className="w-full p-4 bg-card border border-border rounded-xl cursor-pointer hover:border-primary transition-colors text-left flex items-center justify-between mb-5"
-                    >
-                        <div className="flex items-center gap-3">
-                            <CalendarIcon className="w-5 h-5 text-muted-foreground" />
-                            <span className="text-sm font-medium text-foreground">
-                                {displayDate === 'Selecionar'
-                                    ? 'Selecionar data e horário'
-                                    : `${displayDate} • ${displayTime}`
-                                }
-                            </span>
-                        </div>
-                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                    </button>
+                    {/* 1. Booking Type - Label OUTSIDE the box */}
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">Tipo de Bateria</p>
+                    <div className="w-full p-4 bg-card border border-border rounded-xl mb-5">
+                        <Select
+                            value={bookingType}
+                            onValueChange={(value) => onBookingTypeChange(value as 'OPEN' | 'PRIVATE')}
+                        >
+                            <SelectTrigger className="w-full bg-transparent border-none p-0 h-auto text-sm font-medium text-foreground focus:ring-0 shadow-none">
+                                <div className="flex items-center gap-3">
+                                    <Car className="w-5 h-5 text-muted-foreground" />
+                                    <span>{bookingType === 'OPEN' ? 'Bateria Aberta' : 'Bateria Fechada'}</span>
+                                </div>
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="OPEN">
+                                    <span className="font-medium">Bateria Aberta</span>
+                                </SelectItem>
+                                <SelectItem value="PRIVATE">
+                                    <span className="font-medium">Bateria Fechada</span>
+                                </SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                    {/* Participants - Label OUTSIDE the box */}
+                    {/* 2. Participants - Label OUTSIDE the box */}
                     <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">Participantes</p>
                     <div className="w-full p-4 bg-card border border-border rounded-xl flex items-center justify-between mb-5">
                         <div className="flex items-center gap-3">
@@ -153,29 +163,23 @@ export default function MobileHome({
                         </div>
                     </div>
 
-                    {/* Booking Type - Label OUTSIDE the box */}
-                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">Tipo de Bateria</p>
-                    <div className="w-full p-4 bg-card border border-border rounded-xl mb-6">
-                        <Select
-                            value={bookingType}
-                            onValueChange={(value) => onBookingTypeChange(value as 'OPEN' | 'PRIVATE')}
-                        >
-                            <SelectTrigger className="w-full bg-transparent border-none p-0 h-auto text-sm font-medium text-foreground focus:ring-0 shadow-none">
-                                <div className="flex items-center gap-3">
-                                    <Car className="w-5 h-5 text-muted-foreground" />
-                                    <span>{bookingType === 'OPEN' ? 'Bateria Aberta' : 'Bateria Fechada'}</span>
-                                </div>
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="OPEN">
-                                    <span className="font-medium">Bateria Aberta</span>
-                                </SelectItem>
-                                <SelectItem value="PRIVATE">
-                                    <span className="font-medium">Bateria Fechada</span>
-                                </SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
+                    {/* 3. Date and Time - Label OUTSIDE the box */}
+                    <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mb-2">Data e Horário</p>
+                    <button
+                        onClick={onOpenCalendarModal}
+                        className="w-full p-4 bg-card border border-border rounded-xl cursor-pointer hover:border-primary transition-colors text-left flex items-center justify-between mb-6"
+                    >
+                        <div className="flex items-center gap-3">
+                            <CalendarIcon className="w-5 h-5 text-muted-foreground" />
+                            <span className="text-sm font-medium text-foreground">
+                                {displayDate === 'Selecionar'
+                                    ? 'Selecionar data e horário'
+                                    : `${displayDate} • ${displayTime}`
+                                }
+                            </span>
+                        </div>
+                        <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                    </button>
 
                     {/* Price Summary */}
                     <div className="space-y-2 mb-6 pt-4 border-t border-border">
@@ -194,8 +198,15 @@ export default function MobileHome({
                     </div>
 
                     {/* Reserve Button */}
-                    <button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 text-base rounded-full shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98]">
-                        Reservar Agora
+                    <button
+                        onClick={onOpenBookingModal}
+                        disabled={!selectedSlotId}
+                        className={`w-full font-bold py-4 text-base rounded-full shadow-lg flex items-center justify-center gap-2 transition-all active:scale-[0.98] ${selectedSlotId
+                            ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                            }`}
+                    >
+                        {selectedSlotId ? 'Reservar Agora' : 'Selecione data e horário'}
                     </button>
 
                     {/* Note */}
@@ -252,10 +263,8 @@ export default function MobileHome({
 
             {/* FAQ Section */}
             <section className="mt-10">
+                <h2 className="text-lg font-bold mb-4">Dúvidas Frequentes</h2>
                 <div className="bg-card rounded-xl border border-border overflow-hidden">
-                    <div className="p-6 border-b border-border">
-                        <h2 className="text-lg font-bold">Dúvidas Frequentes</h2>
-                    </div>
                     <div className="divide-y divide-border">
                         <details className="group">
                             <summary className="flex items-center justify-between p-4 cursor-pointer transition">

@@ -15,6 +15,38 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Bottom Sheet Animations */
+  @keyframes slide-in-from-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes slide-out-to-bottom {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+
+  .animate-slide-in-from-bottom {
+    animation: slide-in-from-bottom 0.3s ease-out;
+  }
+
+  .animate-slide-out-to-bottom {
+    animation: slide-out-to-bottom 0.2s ease-in;
+  }
+
+  /* Safe area padding for devices with notch/home indicator */
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 
